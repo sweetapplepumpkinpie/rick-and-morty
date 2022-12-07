@@ -15,3 +15,4 @@ export const images = {
   left: Left,
   right: Right,
 };
+export const pageSize = 5;

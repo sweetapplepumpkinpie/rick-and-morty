@@ -7,8 +7,9 @@ import { useContext } from "react";
 import axios from "axios";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
+import queryString from "query-string";
 
-import { CharacterTableHeaders, ServerURL } from "../constants";
+import { CharacterTableHeaders, pageSize, ServerURL } from "../constants";
 import {
   Character,
   CharacterResult,
@@ -17,10 +18,11 @@ import {
   TTableColumn,
 } from "../type";
 import { AppContext } from "./Dashboard";
+import { useMemo } from "react";
 
 export const CharacterTable = (props: any) => {
   const store = useContext(AppContext);
-  const [characters, setCharacters] = useState<Character[] | undefined>();
+  const [pageCharacters, setCharacters] = useState<Character[] | undefined>();
   const { search } = useLocation();
   const [checked, setChecked] = useState<number[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,17 +30,31 @@ export const CharacterTable = (props: any) => {
   useEffect(() => {
     const getCharacter = async () => {
       try {
+        const parsedQuery = queryString.parse(search);
+        const page = +(parsedQuery?.page ?? 1);
         const { data }: { data: CharacterResult } = await axios.get(
-          `${ServerURL}character${search}`
+          `${ServerURL}character?${queryString.stringify({
+            ...parsedQuery,
+            page: Math.floor((page - 1) / 4) + 1,
+          })}`
         );
+        const info = {
+          ...data.info,
+          pages:
+            Math.floor(data.info.count / pageSize) +
+            (data.info.count % pageSize ? 1 : 0),
+        };
+
         setCharacters(data.results);
         setChecked([]);
-        store?.setPageInfo(data.info);
+        store?.setPageInfo(info);
       } catch (error: any) {
         if (axios.isAxiosError(error)) {
           const { response } = error;
+
           if (response?.status === EErrorStatus.NOTFOUND) {
             const page = searchParams.get("page");
+
             page &&
               page !== "1" &&
               setSearchParams({
@@ -54,9 +70,20 @@ export const CharacterTable = (props: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
+  const characters = useMemo(() => {
+    return pageCharacters?.filter((character, index) => {
+      const page = +(searchParams.get("page") ?? "1");
+      const min = ((page % 4 === 0 ? 4 : page % 4) - 1) * pageSize;
+      const max = min + pageSize;
+
+      return character.id && index < max && index >= min;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageCharacters]);
+
   const checkAll = () => {
     setChecked((checked) => {
-      if (checked.length < 20) {
+      if (checked.length < pageSize) {
         return characters
           ? characters.map<number>((character) => character.id)
           : [];
@@ -69,6 +96,7 @@ export const CharacterTable = (props: any) => {
     const {
       target: { id },
     } = event;
+
     setChecked((checked) => {
       const newChecked = [...checked];
       const index = newChecked.indexOf(parseInt(id));
@@ -88,7 +116,7 @@ export const CharacterTable = (props: any) => {
                 id="candidates"
                 aria-describedby="candidates-description"
                 name="candidates"
-                checked={checked.length === 20}
+                checked={checked.length === pageSize}
                 onChange={checkAll}
                 type="checkbox"
                 className="h-[18px] w-[18px] rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
