@@ -6,6 +6,8 @@ React, TypeScript, Tailwind CSS
 
 ### How to start
 
-Run `npm install`
+- `npm install`
 
-`npm start`
+- `npm start`
+
+[Demo](https://bejewelled-praline-b53820.netlify.app/)
