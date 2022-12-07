@@ -45,9 +45,9 @@ export const PageItem: React.FC<IProps> = ({
       onClick={handlePageChange}
     >
       {isEmpty && "..."}
-      {prev && <img src={images.left} />}
+      {prev && <img src={images.left} alt="left-arrow" />}
       {!isEmpty && number}
-      {next && <img src={images.right} />}
+      {next && <img src={images.right} alt="right-arrow" />}
     </button>
   );
 };

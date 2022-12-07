@@ -38,7 +38,8 @@ export const Filter: React.FC<IProps> = ({ ...props }) => {
       )[0];
       return selectedSpecies ?? species[0];
     });
-  }, [searchParams.get("name"), searchParams.get("species")]);
+    // eslint-disable-next-line no-use-before-define
+  }, [searchParams]);
 
   const handleNameSearch = (event: FormEvent) => {
     event.preventDefault();
@@ -48,7 +49,6 @@ export const Filter: React.FC<IProps> = ({ ...props }) => {
     name ? setSearchParams({ ...params, name }) : setSearchParams(params);
   };
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const params = Object.fromEntries([...searchParams]);
     const {
       target: { value: name },
     } = event;
@@ -66,7 +66,7 @@ export const Filter: React.FC<IProps> = ({ ...props }) => {
     setSelected(value);
   };
   const hideTooltip = () => {
-    setFocused(false);
+    focused && setFocused(false);
     setShowTooltip(false);
   };
   const handleOnFocus = () => {
@@ -90,9 +90,7 @@ export const Filter: React.FC<IProps> = ({ ...props }) => {
               placeholder="search"
             />
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              <a data-tip data-for="tooltip">
-                <img src={SearchIcon} />
-              </a>
+              <img src={SearchIcon} alt="search-icon" />
             </div>
             {showTooltip && (
               <div className="absolute max-w-screen bg-black rounded-lg text-white px-4 py-1 left-10 -top-6 z-10">

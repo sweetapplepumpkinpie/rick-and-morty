@@ -4,7 +4,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/solid";
 import { useContext } from "react";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 
@@ -34,7 +34,7 @@ export const CharacterTable = (props: any) => {
         setCharacters(data.results);
         setChecked([]);
         store?.setPageInfo(data.info);
-      } catch (error: any | AxiosError) {
+      } catch (error: any) {
         if (axios.isAxiosError(error)) {
           const { response } = error;
           if (response?.status === EErrorStatus.NOTFOUND) {
@@ -51,6 +51,7 @@ export const CharacterTable = (props: any) => {
       }
     };
     getCharacter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   const checkAll = () => {
@@ -76,8 +77,6 @@ export const CharacterTable = (props: any) => {
       return newChecked;
     });
   };
-
-  useEffect(() => {}, [characters]);
 
   return (
     <div {...props}>
@@ -154,6 +153,7 @@ export const CharacterTable = (props: any) => {
                     <img
                       className="w-12 rounded-2xl shadow-md drop-shadow-md"
                       src={character.image}
+                      alt={`${character.name}-${character.id}`}
                     />
                   </td>
                   <td
