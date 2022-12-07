@@ -71,19 +71,21 @@ export const CharacterTable = (props: any) => {
   }, [search]);
 
   const characters = useMemo(() => {
-    return pageCharacters?.filter((character, index) => {
-      const page = +(searchParams.get("page") ?? "1");
-      const min = ((page % 4 === 0 ? 4 : page % 4) - 1) * pageSize;
-      const max = min + pageSize;
+    return pageCharacters
+      ? pageCharacters.filter((character, index) => {
+          const page = +(searchParams.get("page") ?? "1");
+          const min = ((page % 4 === 0 ? 4 : page % 4) - 1) * pageSize;
+          const max = min + pageSize;
 
-      return character.id && index < max && index >= min;
-    });
+          return character.id && index < max && index >= min;
+        })
+      : [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageCharacters]);
 
   const checkAll = () => {
     setChecked((checked) => {
-      if (checked.length < pageSize) {
+      if (checked.length < characters?.length) {
         return characters
           ? characters.map<number>((character) => character.id)
           : [];
@@ -116,7 +118,7 @@ export const CharacterTable = (props: any) => {
                 id="candidates"
                 aria-describedby="candidates-description"
                 name="candidates"
-                checked={checked.length === pageSize}
+                checked={checked.length === characters?.length}
                 onChange={checkAll}
                 type="checkbox"
                 className="h-[18px] w-[18px] rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
